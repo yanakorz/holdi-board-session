@@ -60,6 +60,8 @@ button,input,textarea{font:inherit;color:inherit}
 .facts dd{font-weight:600}
 .facts dd.unset{font-weight:400;color:var(--muted)}
 .link-btn{border:0;background:none;padding:0;color:var(--accent);font-weight:600;font-size:14px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.stats-link{color:var(--accent);font-weight:600;font-size:14px;text-decoration:none;white-space:nowrap;border:1px solid var(--line);border-radius:8px;padding:7px 12px}
+.stats-link:hover{background:var(--surface-2)}
 .meta-edit{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
 .meta-edit label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted);flex:1 1 200px;min-width:0}
 .cta-row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
@@ -180,6 +182,7 @@ textarea::placeholder,input::placeholder{color:var(--muted);opacity:.75}
   .wrap{padding-inline:16px}
   .brand{width:100%}
   .tabs{width:100%}
+  .stats-link{width:100%;text-align:center}
   .tab{flex:1;padding-inline:6px}
   .field.small{grid-template-columns:minmax(0,1fr)}
   .field.small label{padding-top:0}
@@ -206,6 +209,7 @@ textarea::placeholder,input::placeholder{color:var(--muted);opacity:.75}
       <button class="tab" role="tab" id="tab-anketa" data-tab="anketa" aria-selected="false">Моя анкета</button>
       <button class="tab" role="tab" id="tab-itogi" data-tab="itogi" aria-selected="false">Итоги<span class="count" id="tabCount">0/4</span></button>
     </nav>
+    <a class="stats-link" href="hr_analytics_9m_2026.html">HR-аналитика 9м'2026 →</a>
   </header>
 
   <main>

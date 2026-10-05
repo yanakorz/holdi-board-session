@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>hr analytics 9m'2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#000000; --fg:#FFFFFF; --mut:#929292;
+    --green:#2B8042; --orange:#FF5A2A; --purple:#6B54A1; --yellow:#E5FE55;
+    --line:#1c1c1c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);color:var(--fg);
+    font-family:'Roboto Mono',monospace;font-weight:400;
+    font-size:15px;line-height:1.55;letter-spacing:.2px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 40px}
+  section{padding:110px 0;border-top:1px solid var(--line)}
+  section:first-of-type{border-top:none}
+  h1{font-size:52px;font-weight:400;line-height:1.05;letter-spacing:-1px}
+  h2{font-size:13px;font-weight:400;color:var(--mut);text-transform:lowercase;margin-bottom:44px;letter-spacing:2px}
+  .lead{color:var(--mut);font-size:17px;max-width:680px;margin-top:26px;line-height:1.7}
+  .big{font-size:120px;line-height:1;letter-spacing:-4px}
+  .mut{color:var(--mut)}
+  .green{color:var(--green)} .orange{color:var(--orange)} .purple{color:var(--purple)} .yellow{color:var(--yellow)}
+  .tiny{font-size:12px;color:var(--mut);letter-spacing:1px}
+  .row{display:flex;flex-wrap:wrap;gap:64px;align-items:flex-start}
+  .col{flex:1;min-width:220px}
+
+  /* stat callouts */
+  .stats{display:flex;flex-wrap:wrap;gap:56px}
+  .stat .n{font-size:56px;line-height:1;letter-spacing:-2px}
+  .stat .l{font-size:12px;color:var(--mut);margin-top:12px;letter-spacing:1px;max-width:180px}
+
+  /* horizontal bar chart */
+  .bars{margin-top:8px}
+  .bar{display:grid;grid-template-columns:150px 1fr 46px;align-items:center;gap:14px;padding:5px 0}
+  .bar .lab{font-size:13px;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bar .track{height:14px;background:var(--line);position:relative}
+  .bar .fill{height:14px;position:absolute;left:0;top:0}
+  .bar .val{font-size:13px;color:var(--mut);text-align:right}
+  .bar.small{grid-template-columns:96px 1fr 34px;gap:10px}
+  .bar.small .lab{font-size:11px} .bar.small .val{font-size:11px}
+  .bar.small .track,.bar.small .fill{height:10px}
+
+  /* table */
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+  th{text-align:left;color:var(--mut);font-weight:400;padding:12px 14px;border-bottom:1px solid var(--line);font-size:11px;letter-spacing:1px}
+  td{padding:12px 14px;border-bottom:1px solid var(--line)}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+
+  /* decomposition stacked */
+  .decomp{display:flex;height:44px;width:100%;margin-top:10px;overflow:hidden}
+  .decomp div{display:flex;align-items:center;justify-content:center;font-size:12px;color:#000}
+  .legend{display:flex;flex-wrap:wrap;gap:26px;margin-top:26px}
+  .legend span{font-size:12px;color:var(--mut)}
+  .dot{display:inline-block;width:9px;height:9px;margin-right:8px;vertical-align:middle}
+
+  /* flow */
+  .flow{display:flex;gap:0;margin-top:20px;align-items:flex-end;height:220px}
+  .month{flex:1;display:flex;flex-direction:column;align-items:center;gap:0;height:100%;justify-content:flex-end}
+  .mcols{display:flex;gap:6px;align-items:flex-end;height:180px}
+  .mcol{width:26px;display:flex;flex-direction:column;justify-content:flex-end}
+  .mcap{font-size:12px;color:var(--mut);margin-top:14px}
+
+  .kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin-top:8px}
+  .kpi>div{background:var(--bg);padding:28px 26px}
+  .kpi .n{font-size:40px;line-height:1;letter-spacing:-1px}
+  .kpi .l{font-size:11px;color:var(--mut);margin-top:12px;letter-spacing:1px;line-height:1.5}
+
+  .note{color:var(--mut);font-size:13px;line-height:1.8;max-width:760px}
+  .note b{color:var(--fg)}
+  footer{padding:80px 0 120px;border-top:1px solid var(--line);color:var(--mut);font-size:13px}
+  .delta-up{color:var(--green)} .delta-down{color:var(--orange)}
+
+  /* visual product cards */
+  .pcard{display:grid;grid-template-columns:180px 1fr 70px 90px;gap:26px;align-items:center;padding:15px 0;border-bottom:1px solid var(--line)}
+  .phead{padding:0 0 12px;font-size:11px;color:var(--mut);letter-spacing:1px;border-bottom:1px solid var(--line)}
+  .pcard .pname{font-size:14px}
+  .phc-wrap{display:flex;align-items:center;gap:10px;margin-top:6px}
+  .phc-track{flex:1;height:6px;background:var(--line)}
+  .phc-fill{height:6px;background:#3a3a3a}
+  .phc-n{font-size:11px;color:var(--mut);min-width:26px}
+  .gsplit{height:24px;display:flex;overflow:hidden;font-size:11px}
+  .gsplit .gm{background:var(--purple);color:#fff;display:flex;align-items:center;padding-left:9px}
+  .gsplit .gf{background:#3a3357;color:#cfc7e6;display:flex;align-items:center;justify-content:flex-end;padding-right:9px;flex:1}
+  .pc-age{font-size:16px;text-align:center;font-variant-numeric:tabular-nums}
+  .pc-ten{font-size:16px;text-align:right;font-variant-numeric:tabular-nums}
+
+  /* benchmarks */
+  .brow{display:grid;grid-template-columns:220px 80px 1fr 120px;gap:20px;align-items:center;padding:18px 0;border-bottom:1px solid var(--line)}
+  .bhead{font-size:11px;color:var(--mut);letter-spacing:1px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+  .bmetric{font-size:14px}
+  .bmetric .sub{font-size:11px;color:var(--mut);margin-top:3px}
+  .bval{font-size:24px;text-align:right;font-variant-numeric:tabular-nums}
+  .bscale{position:relative;height:28px}
+  .bscale .axis{position:absolute;top:13px;left:0;right:0;height:1px;background:var(--line)}
+  .bscale .norm{position:absolute;top:9px;height:10px;background:#2f2f2f}
+  .bscale .normlab{position:absolute;top:19px;font-size:10px;color:var(--mut)}
+  .bscale .mark{position:absolute;top:4px;width:2px;height:20px}
+  .bscale .marklab{position:absolute;top:-6px;font-size:10px;transform:translateX(-50%)}
+  .bverdict{font-size:12px;text-align:right;line-height:1.4}
+</style>
+<style>
+  .pair{display:grid;grid-template-columns:150px 1fr 40px;gap:14px;align-items:center;padding:4px 0}
+  .pair .lab{font-size:13px}
+  .pair .tr{display:flex;flex-direction:column;gap:3px}
+  .pair .t{height:9px;background:var(--line);position:relative}
+  .pair .t div{position:absolute;left:0;top:0;height:9px}
+  .pair .v{font-size:11px;color:var(--mut);text-align:right;line-height:1.35}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:64px}
+  .chip{display:inline-block;font-size:11px;color:var(--mut);border:1px solid #2a2a2a;padding:3px 8px;margin:3px 6px 3px 0}
+  .pblock{padding:22px 0;border-bottom:1px solid var(--line)}
+  .pblock .h{display:flex;justify-content:space-between;align-items:baseline}
+  .pblock .h .n{font-size:14px} .pblock .h .s{font-size:12px;color:var(--mut)}
+  .seg{display:flex;height:22px;margin-top:12px;gap:2px}
+  .seg div{background:#3a3a3a;font-size:10px;color:#ddd;display:flex;align-items:center;padding-left:7px;white-space:nowrap;overflow:hidden}
+  .pat{display:grid;grid-template-columns:60px 1fr;gap:24px;padding:30px 0;border-bottom:1px solid var(--line)}
+  .pat .k{font-size:28px;color:var(--mut);line-height:1}
+  .pat .t1{font-size:16px;margin-bottom:10px}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr}.pcard,.brow{grid-template-columns:1fr}.big{font-size:72px}h1{font-size:38px}}
+</style>
+</head>
+<body>
+<section>
+  <div class="wrap">
+    <div class="tiny" style="margin-bottom:28px">space307 · people analytics</div>
+    <h1>hr analytics<br>9 месяцев 2026</h1>
+    <p class="lead">с января по сентябрь компания уменьшилась на 44 человека (−8,8%). численность снижалась каждый квартал, и каждый следующий квартал был жёстче: три волны сокращений подряд, найм упал с 27 до 8 человек за квартал. уходов по собственному желанию по-прежнему немного, но есть две зоны, где они устойчиво выше: otp tech и первый год работы.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>итог 9 месяцев</h2>
+    <div class="stats">
+      <div class="stat"><div class="n">458</div><div class="l">сотрудников на 30.09 (на 31.12.25 — 502)</div></div>
+      <div class="stat"><div class="n orange">−44</div><div class="l">изменение численности с начала года, −8,8%</div></div>
+      <div class="stat"><div class="n">54</div><div class="l">новых сотрудника</div></div>
+      <div class="stat"><div class="n">96</div><div class="l">увольнений</div></div>
+      <div class="stat"><div class="n">0,56</div><div class="l">найма на одного ушедшего — на двоих ушедших приходит один новый</div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>численность по кварталам — q2'25 → q3'26</h2>
+    <div class="flow" id="hcTrend" style="height:240px"></div>
+    <p class="tiny" style="margin-top:14px">численность на конец квартала · шкала начинается с 420, чтобы разница была видна.</p>
+    <div class="row" style="margin-top:44px">
+      <div class="col"><p class="note">в 2025 году численность понемногу росла и держалась на уровне <b>495–502</b> человек. в 2026 тренд развернулся: q1 −4, q2 −9, q3 −31. <b>за год (q3'25 → q3'26) компания стала меньше на 40 человек, или на 8%.</b> от максимума конца 2025 года (502) — минус 44.</p></div>
+      <div class="col"><p class="note"><b class="orange">сокращение ускоряется:</b> 70% годового минуса пришлось на q3. если найм останется на уровне q3 (8 человек за квартал), а уходы, не связанные с сокращениями, — на уровне q2–q3 (~12 за квартал), компания продолжит терять 4–5 человек в квартал даже без новых сокращений.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>квартал к кварталу</h2>
+    <table>
+      <thead><tr><th>показатель</th><th class="num">q1'26</th><th class="num">q2'26</th><th class="num">q3'26</th><th class="num">9 мес</th></tr></thead>
+      <tbody>
+        <tr><td>численность на конец периода</td><td class="num">498</td><td class="num">489</td><td class="num">458</td><td class="num">458</td></tr>
+        <tr><td>средняя численность</td><td class="num">~497</td><td class="num">~491</td><td class="num">~474</td><td class="num">~487</td></tr>
+        <tr><td>найм</td><td class="num">27</td><td class="num">19</td><td class="num">8</td><td class="num">54</td></tr>
+        <tr><td>увольнения</td><td class="num">30</td><td class="num">27</td><td class="num">39</td><td class="num">96</td></tr>
+        <tr><td>разница (найм − увольнения)</td><td class="num">−3</td><td class="num">−8</td><td class="num delta-down">−31</td><td class="num delta-down">−42</td></tr>
+        <tr><td>найм, % от численности</td><td class="num">5,4%</td><td class="num">3,9%</td><td class="num">1,7%</td><td class="num">11,1%</td></tr>
+        <tr><td>текучесть, % от численности</td><td class="num">6,0%</td><td class="num">5,5%</td><td class="num">8,2%</td><td class="num">19,7%</td></tr>
+        <tr><td>наймов на одного ушедшего</td><td class="num">0,90</td><td class="num">0,70</td><td class="num delta-down">0,21</td><td class="num">0,56</td></tr>
+        <tr><td>по собственному желанию / по инициативе компании</td><td class="num">37 / 63%</td><td class="num">26 / 74%</td><td class="num">13 / 87%</td><td class="num">24 / 76%</td></tr>
+        <tr><td>доля сокращений в увольнениях</td><td class="num mut">н/д</td><td class="num">44%</td><td class="num">74%</td><td class="num mut">62% (q2–q3)</td></tr>
+        <tr><td>текучесть без учёта сокращений</td><td class="num mut">н/д</td><td class="num">3,1%</td><td class="num">2,1%</td><td class="num mut">5,2% (q2–q3)</td></tr>
+        <tr><td>нежелательные уходы, чел</td><td class="num mut">н/д</td><td class="num">6</td><td class="num">5</td><td class="num mut">11 (q2–q3)</td></tr>
+        <tr><td>главная причина ухода по собственному желанию</td><td class="num mut">н/д</td><td class="num">выгорание</td><td class="num">финансовые условия</td><td class="num mut">—</td></tr>
+        <tr><td>средний стаж</td><td class="num">3г 11м</td><td class="num">4г 2м</td><td class="num">4г 6м</td><td class="num">—</td></tr>
+        <tr><td>главное событие квартала</td><td class="num mut">чистка otp marketing</td><td class="num mut">закрытие walbi</td><td class="num mut">сокращения doto, otp marketing, corp</td><td class="num">—</td></tr>
+      </tbody>
+    </table>
+    <p class="note" style="margin-top:30px">три показателя все три квартала движутся в одну сторону: <b>найм снижается, наймов на одного ушедшего всё меньше, доля увольнений по инициативе компании растёт.</b> общая текучесть выросла только в q3. до этого люди уходили не чаще обычного — просто компания меньше нанимала. в q3 к остановке найма добавились крупные сокращения.</p>
+    <p class="tiny" style="margin-top:18px">как читать: <b>по собственному желанию</b> — сотрудник ушёл сам; <b>по инициативе компании</b> — сокращение или индивидуальное решение (результаты работы, коммуникация, административные причины); <b>нежелательные уходы</b> — ушли сами, и мы хотели бы их удержать (все уходы по собственному желанию, кроме декрета). причины фиксируются с q2'26, по q1 известен только тип. разница по потокам (−42) отличается от изменения численности (−44) на 2 человека из-за переводов и границ периода.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>найм и увольнения по месяцам — январь–сентябрь</h2>
+    <div class="flow" id="flow"></div>
+    <div class="legend" style="margin-top:8px">
+      <span><span class="dot" style="background:var(--green)"></span>найм</span>
+      <span><span class="dot" style="background:var(--orange)"></span>увольнения</span>
+    </div>
+    <div class="row" style="margin-top:50px">
+      <div class="col"><p class="note"><b>три пика увольнений — март (12), май (16) и сентябрь (21)</b>, и каждый выше предыдущего. в остальные месяцы уходит 3–8 человек.</p></div>
+      <div class="col"><p class="note"><b>последний месяц, когда наняли больше, чем ушло, — апрель</b> (8 против 3). до июня приходило 4–15 человек в месяц, с августа — 1–2. больше всего наняли в марте (15).</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>продукты — численность, найм и увольнения за 9 месяцев</h2>
+    <table>
+      <thead><tr><th>продукт</th><th class="num">янв</th><th class="num">q1</th><th class="num">q2</th><th class="num">q3</th><th class="num">Δ янв→q3</th><th class="num">Δ %</th><th class="num">найм</th><th class="num">увол.</th></tr></thead>
+      <tbody id="prodTable"></tbody>
+    </table>
+    <p class="tiny" style="margin-top:16px">янв — численность на конец января (первая доступная точка по продуктам), q1–q3 — на конец кварталов. найм и увольнения — сумма за 9 месяцев; zerox = walbi, bo → otp others. изменение численности и потоки по продукту могут расходиться на 1–3 человека из-за внутренних переводов.</p>
+    <div id="prodVis" style="margin-top:50px"></div>
+    <div class="legend" style="margin-top:20px">
+      <span><span class="dot" style="background:var(--green)"></span>найм за 9 месяцев</span>
+      <span><span class="dot" style="background:var(--orange)"></span>увольнения за 9 месяцев</span>
+    </div>
+    <div class="row" style="margin-top:40px">
+      <div class="col"><p class="note"><b>шесть продуктов уменьшились, четыре выросли.</b> сильнее всего сократились walbi (−33%), doto (−21%), otp analytics (−17%), corp (−15%) и otp product (−14%). выросли petpro (с нуля до 6 человек), knx (+3), otp others (+2) и gate (+1). компания не просто уменьшается, а перераспределяет людей между направлениями.</p></div>
+      <div class="col"><p class="note"><b class="orange">в otp tech и otp marketing самая высокая сменяемость людей:</b> на них пришлось 59% всего найма (32 из 54) и 43% увольнений (41 из 96). численность otp tech почти не изменилась (−1), но за этим стоят 18 уходов и 15 наймов: команда меняет каждого седьмого только для того, чтобы остаться в прежнем размере.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>как менялся состав команды</h2>
+    <div class="row">
+      <div class="col">
+        <div class="tiny" style="margin-bottom:12px">возрастные группы · на конец периода</div>
+        <table>
+          <thead><tr><th>возраст</th><th class="num">янв</th><th class="num">мар</th><th class="num">июн</th><th class="num">сен</th><th class="num">Δ</th></tr></thead>
+          <tbody id="ageTable"></tbody>
+        </table>
+      </div>
+      <div class="col">
+        <div class="tiny" style="margin-bottom:12px">пол и возраст</div>
+        <table>
+          <thead><tr><th></th><th class="num">янв</th><th class="num">мар</th><th class="num">июн</th><th class="num">сен</th></tr></thead>
+          <tbody>
+            <tr><td>мужчины</td><td class="num">272</td><td class="num">279</td><td class="num">272</td><td class="num">252</td></tr>
+            <tr><td>женщины</td><td class="num">222</td><td class="num">219</td><td class="num">217</td><td class="num">206</td></tr>
+            <tr><td>доля женщин</td><td class="num">44,9%</td><td class="num">44,0%</td><td class="num">44,4%</td><td class="num">45,0%</td></tr>
+            <tr><td>средний возраст</td><td class="num">34</td><td class="num">34</td><td class="num">34,3</td><td class="num">34,7</td></tr>
+            <tr><td>самый молодой</td><td class="num">22</td><td class="num">21</td><td class="num">21</td><td class="num">22</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <p class="note" style="margin-top:36px"><b class="purple">средний возраст растёт, потому что уходят молодые.</b> в группе 26–30 лет стало на 30 человек меньше (−25%), в группе 31–35 — на 17, а в группе 36–40 — на 10 больше. часть сдвига объясняется тем, что за 9 месяцев все стали старше, но этим не объяснить минус четверть в одной группе. уходящие в среднем моложе остающихся (33,3 против 34,7), а найм, который обычно приводит людей 25–30 лет, почти остановлен. соотношение мужчин и женщин за год не изменилось: 44–45% женщин.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>стаж — растёт, но не за счёт удержания</h2>
+    <table>
+      <thead><tr><th>стаж в компании</th><th class="num">янв</th><th class="num">мар</th><th class="num">июн</th><th class="num">сен</th><th class="num">доля в сен</th></tr></thead>
+      <tbody>
+        <tr><td>меньше 1 года</td><td class="num">88</td><td class="num">93</td><td class="num">82</td><td class="num">60</td><td class="num">13,1%</td></tr>
+        <tr><td>меньше 3 лет</td><td class="num">213</td><td class="num">222</td><td class="num">208</td><td class="num delta-down">173</td><td class="num">37,8%</td></tr>
+        <tr><td><span class="yellow">3–6 лет — опытное ядро</span></td><td class="num">155</td><td class="num">150</td><td class="num">149</td><td class="num">149</td><td class="num">32,5%</td></tr>
+        <tr><td>6 лет и больше</td><td class="num">126</td><td class="num">126</td><td class="num">132</td><td class="num">136</td><td class="num">29,7%</td></tr>
+        <tr><td>средний стаж</td><td class="num">3г 11м</td><td class="num">3г 11м</td><td class="num">4г 2м</td><td class="num">4г 6м</td><td class="num mut">+7 мес</td></tr>
+      </tbody>
+    </table>
+    <p class="note" style="margin-top:30px">средний стаж вырос на 7 месяцев, но <b>не потому, что люди стали дольше оставаться.</b> сотрудников со стажем меньше 3 лет стало на 40 меньше: новички уходят, а новых почти не нанимают. опытное ядро (3–6 лет) и самые давние сотрудники (6+ лет) стабильны или прибавляют. <b class="yellow">ядро пока держится, но в q3 сами начали уходить и опытные люди</b> — это ранний сигнал, а не устойчивый тренд.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>из чего состоят 96 увольнений</h2>
+    <div class="tiny" style="margin-bottom:14px">по кварталам: кто был инициатором ухода</div>
+    <div id="typeBars"></div>
+    <div class="legend">
+      <span><span class="dot" style="background:var(--orange)"></span>по собственному желанию</span>
+      <span><span class="dot" style="background:#5a5a5a"></span>по инициативе компании</span>
+    </div>
+
+    <div class="tiny" style="margin:64px 0 4px">q2 + q3 по причинам · 66 увольнений</div>
+    <div class="decomp">
+      <div style="width:62.1%;background:var(--mut)">41 · сокращения</div>
+      <div style="width:19.7%;background:#5a5a5a;color:#fff">13 · реш. компании</div>
+      <div style="width:16.7%;background:var(--orange)">11 · нежел.</div>
+      <div style="width:1.5%;background:#2a2a2a"></div>
+    </div>
+    <div class="legend">
+      <span><span class="dot" style="background:var(--mut)"></span>сокращения — 41 (doto 11, walbi 10, otp marketing 10, corp 9, otp product 1)</span>
+      <span><span class="dot" style="background:#5a5a5a"></span>индивидуальные решения компании — 13 (результаты работы 9, коммуникация 2, административные 1, другое 1)</span>
+      <span><span class="dot" style="background:var(--orange)"></span>нежелательные уходы по собственному желанию — 11 (выгорание 4, нет роста 3, финансовые условия 3, другое 1)</span>
+      <span><span class="dot" style="background:#2a2a2a"></span>декрет — 1</span>
+    </div>
+    <p class="note" style="margin-top:40px">за полгода, по которому известны причины, <b>сокращения — 62% всех увольнений</b>. без них за 6 месяцев ушло 25 человек — это нормальный уровень. 13 из них расстались с компанией по её решению, и только <b class="orange">11 ушли сами, хотя мы хотели бы их сохранить</b> — в среднем около двух человек в месяц.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>причины увольнений за два квартала</h2>
+    <div class="row">
+      <div class="col">
+        <div class="tiny" style="margin-bottom:16px">все причины, q2 + q3 · 66</div>
+        <div class="bars" id="reasonBars"></div>
+      </div>
+      <div class="col">
+        <div class="tiny" style="margin-bottom:16px">причины, не связанные с сокращениями</div>
+        <table>
+          <thead><tr><th>причина</th><th>кто инициатор</th><th class="num">q2</th><th class="num">q3</th><th class="num">Σ</th></tr></thead>
+          <tbody>
+            <tr><td>низкие результаты работы</td><td class="mut">компания</td><td class="num">6</td><td class="num">3</td><td class="num">9</td></tr>
+            <tr><td class="orange">выгорание</td><td class="mut">сотрудник</td><td class="num">4</td><td class="num">0</td><td class="num">4</td></tr>
+            <tr><td class="orange">нет роста</td><td class="mut">сотрудник</td><td class="num">2</td><td class="num">1</td><td class="num">3</td></tr>
+            <tr><td class="orange">финансовые условия</td><td class="mut">сотрудник</td><td class="num">0</td><td class="num">3</td><td class="num">3</td></tr>
+            <tr><td>проблемы коммуникации</td><td class="mut">компания</td><td class="num">1</td><td class="num">1</td><td class="num">2</td></tr>
+            <tr><td>другое</td><td class="mut">q2 — компания, q3 — сотрудник</td><td class="num">1</td><td class="num">1</td><td class="num">2</td></tr>
+            <tr><td>административные причины</td><td class="mut">компания</td><td class="num">0</td><td class="num">1</td><td class="num">1</td></tr>
+            <tr><td>декрет</td><td class="mut">сотрудник</td><td class="num">1</td><td class="num">0</td><td class="num">1</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="row" style="margin-top:44px">
+      <div class="col"><p class="note"><b>сами уходят по трём примерно равным причинам:</b> выгорание (4), отсутствие роста (3) и финансовые условия (3). за полгода ни одна не доминирует, но они сменяют друг друга: выгорание было в q2, деньги появились в q3. <b>отсутствие роста — единственная причина, которая есть в обоих кварталах</b> (otp marketing — 2, otp tech — 1).</p></div>
+      <div class="col"><p class="note"><b>чаще всего, если не считать сокращений, компания расстаётся из-за результатов работы — 9 человек из 25.</b> 5 из 13 таких решений — в otp tech. вместе с высокой сменяемостью команды это вопрос к найму в tech: часть людей не оправдывает ожиданий в первые 1–2 года.</p></div>
+    </div>
+
+    <div style="margin-top:70px">
+      <div class="tiny" style="margin-bottom:10px">уходы по собственному желанию за 9 месяцев по продуктам · 23</div>
+      <table>
+        <thead><tr><th>продукт</th><th class="num">q1</th><th class="num">q2</th><th class="num">q3</th><th class="num">Σ</th><th class="num">доля в уходах по собств. желанию</th><th class="num">доля в численности</th></tr></thead>
+        <tbody>
+          <tr><td class="orange">otp tech</td><td class="num">3</td><td class="num">2</td><td class="num">3</td><td class="num">8</td><td class="num orange">35%</td><td class="num">26%</td></tr>
+          <tr><td>otp marketing</td><td class="num">4</td><td class="num">1</td><td class="num">1</td><td class="num">6</td><td class="num">26%</td><td class="num">24%</td></tr>
+          <tr><td>corp</td><td class="num">1</td><td class="num">2</td><td class="num">0</td><td class="num">3</td><td class="num">13%</td><td class="num">16%</td></tr>
+          <tr><td>otp risks</td><td class="num">1</td><td class="num">1</td><td class="num">0</td><td class="num">2</td><td class="num">9%</td><td class="num">3%</td></tr>
+          <tr><td>doto</td><td class="num">1</td><td class="num">1</td><td class="num">0</td><td class="num">2</td><td class="num">9%</td><td class="num">7%</td></tr>
+          <tr><td>otp product</td><td class="num">1</td><td class="num">0</td><td class="num">0</td><td class="num">1</td><td class="num">4%</td><td class="num">5%</td></tr>
+          <tr><td>otp analytics</td><td class="num">0</td><td class="num">0</td><td class="num">1</td><td class="num">1</td><td class="num">4%</td><td class="num">2%</td></tr>
+        </tbody>
+      </table>
+      <p class="note" style="margin-top:26px"><b class="orange">otp tech — единственный крупный продукт, где сами уходят заметно чаще, чем можно ожидать по размеру команды:</b> 35% всех уходов по собственному желанию при 26% численности, и так каждый квартал. в otp risks 2 таких ухода при команде из 14 человек — немного в абсолютных цифрах, но это 14% команды за 9 месяцев. в декрет за этот период ушёл 1 сотрудник (otp tech, q2).</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>кто уходит — портрет 96 уволенных</h2>
+    <div class="stats">
+      <div class="stat"><div class="n">2,3</div><div class="l">года — медианный стаж на момент ухода (в среднем по компании — 4,5)</div></div>
+      <div class="stat"><div class="n orange">57%</div><div class="l">ушли в первые 3 года работы</div></div>
+      <div class="stat"><div class="n orange">23</div><div class="l">ушли, не проработав и года (26%)</div></div>
+      <div class="stat"><div class="n">33,3</div><div class="l">средний возраст на момент ухода (по компании — 34,7)</div></div>
+    </div>
+    <div class="row" style="margin-top:44px">
+      <div class="col">
+        <div class="tiny" style="margin-bottom:16px">стаж на момент ухода · 90 человек с известной датой выхода на работу</div>
+        <div class="bars" id="leaverTen"></div>
+      </div>
+      <div class="col">
+        <div class="tiny" style="margin-bottom:12px">по кварталам</div>
+        <table>
+          <thead><tr><th></th><th class="num">q1</th><th class="num">q2</th><th class="num">q3</th></tr></thead>
+          <tbody>
+            <tr><td>медианный стаж на момент ухода, лет</td><td class="num">2,2</td><td class="num">2,0</td><td class="num">2,8</td></tr>
+            <tr><td>ушли, не проработав года</td><td class="num">11</td><td class="num">7</td><td class="num">5</td></tr>
+            <tr><td>средний возраст</td><td class="num">33,3</td><td class="num">35,8</td><td class="num">31,7</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <p class="note" style="margin-top:36px"><b>самая устойчивая закономерность года:</b> каждый квартал уходят люди, проработавшие в среднем 2–2,8 года, — вдвое меньше среднего стажа по компании. каждый четвёртый уволенный не проработал и года. больше всего таких ранних уходов было в q1 (11 из 30) — сразу после самого активного месяца найма. <b class="orange">из 56 человек, пришедших в 2026 году, уже ушли 10 (18%)</b> — никто из них не проработал больше 9 месяцев, половина попала под сокращения.</p>
+    <p class="tiny" style="margin-top:16px">портрет построен по датам увольнения в выгрузке от 05.10.2026 (без vip и teamwhale); по отдельным кварталам может расходиться с журналом увольнений на 1–2 человека из-за дат на границе квартала.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>закономерности года — что видно только за три квартала</h2>
+    <div class="pat"><div class="k">01</div><div><div class="t1">каждый квартал — новая волна сокращений, и каждая крупнее</div><p class="note">q1: чистка otp marketing в марте (7 из 12 увольнений месяца — по инициативе компании). q2: закрытие walbi в мае (10 сокращений). q3: сокращения сразу в doto, otp marketing и corp (29 человек). первые два квартала это были разовые события на фоне спокойной текучести; в q3 сокращения стали системными.</p></div></div>
+    <div class="pat"><div class="k">02</div><div><div class="t1 orange">найм снижается каждый квартал: 27 → 19 → 8</div><p class="note">на одного ушедшего приходилось 0,90 нового сотрудника в q1, 0,70 в q2 и 0,21 в q3. 59% найма года пришлось на otp tech и otp marketing, ещё 5 человек — на запуск petpro. то есть нанимали в основном на замену ушедших в двух крупнейших командах и под одно новое направление, а не для роста.</p></div></div>
+    <div class="pat"><div class="k">03</div><div><div class="t1 orange">otp tech постоянно теряет людей без всяких сокращений</div><p class="note">за 9 месяцев из команды ушли 18 человек — около 20% в пересчёте на год, при рыночной норме для tech 13–15%. 8 ушли сами, ещё 5 — по решению компании из-за результатов работы. до q3 найм это компенсировал (15 новых людей), в q3 — уже нет. это главный риск: он не связан с решениями о сокращениях и продолжится, даже если их больше не будет.</p></div></div>
+    <div class="pat"><div class="k">04</div><div><div class="t1">первый год работы — самый уязвимый период</div><p class="note">26% уволенных не проработали и года, а типичный стаж на момент ухода стабильно 2–2,8 года. 18% пришедших в 2026 году уже ушли. сокращения усилили эффект: новые сотрудники первыми попадают под оптимизацию (в doto людей наняли в июле, а в сентябре сократили).</p></div></div>
+    <div class="pat"><div class="k">05</div><div><div class="t1">меняется причина, по которой уходят ценные люди: выгорание → деньги</div><p class="note">за полгода 11 нежелательных уходов: поровну выгорание, отсутствие роста и финансовые условия. в q2 чаще всего уходили из-за выгорания, в q3 — из-за денег. отсутствие роста встречается в обоих кварталах. гипотеза: на фоне сокращений и остановки найма нагрузка перестала быть главной проблемой, её место заняли неуверенность в будущем и внешние предложения.</p></div></div>
+    <div class="pat"><div class="k">06</div><div><div class="t1">команда стала старше и опытнее — но не благодаря удержанию</div><p class="note">людей 26–30 лет стало на четверть меньше, сотрудников со стажем меньше 3 лет — на 40 человек меньше, средний стаж вырос на 7 месяцев. причина не в том, что люди стали дольше оставаться, а в том, что молодых и новых перестали нанимать и они уходят первыми. сейчас это делает команды стабильнее, но без найма у компании не будет притока новых людей.</p></div></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>ключевые показатели за 9 месяцев</h2>
+    <div class="kpi">
+      <div><div class="n">19,7%</div><div class="l">текучесть за 9 месяцев<br>96 увольнений на ~487 человек средней численности</div></div>
+      <div><div class="n">11,1%</div><div class="l">найм за 9 месяцев<br>54 человека на ~487</div></div>
+      <div><div class="n orange">0,56</div><div class="l">наймов на одного ушедшего<br>q1 0,90 · q2 0,70 · q3 0,21</div></div>
+      <div><div class="n">62%</div><div class="l">доля сокращений (q2–q3)<br>среди всех увольнений</div></div>
+      <div><div class="n">5,2%</div><div class="l">текучесть без сокращений (q2–q3)<br>все остальные причины за полгода</div></div>
+      <div><div class="n">2,3%</div><div class="l">нежелательные уходы (q2–q3)<br>11 человек ушли сами, хотя мы хотели их удержать</div></div>
+      <div><div class="n orange">35%</div><div class="l">доля otp tech в уходах по собственному желанию<br>при 26% численности</div></div>
+      <div><div class="n orange">26%</div><div class="l">ушли в первый год<br>23 из 90 уволенных с известной датой выхода</div></div>
+      <div><div class="n">18%</div><div class="l">новички 2026, которые уже ушли<br>10 из 56</div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>сравнение с рынком — в пересчёте на год</h2>
+    <p class="lead" style="margin-top:0">показатели за 9 месяцев пересчитаны на год (×4/3), за полгода — ×2. серая зона — типичный диапазон для it/tech, отметка — space307.</p>
+    <div class="bench" style="margin-top:40px">
+      <div class="brow bhead"><div>показатель (за год)</div><div style="text-align:right">space307</div><div>норма it/tech</div><div style="text-align:right">оценка</div></div>
+      <div id="benchRows"></div>
+    </div>
+    <div class="row" style="margin-top:40px">
+      <div class="col"><p class="note"><b class="green">если не считать сокращений, с удержанием людей у компании всё в порядке или лучше рынка:</b> текучесть без сокращений ~10%, нежелательных уходов ~5% (уровень лучших компаний), стаж и баланс мужчин и женщин выше нормы. общая текучесть 26% выше нормы только из-за сокращений.</p></div>
+      <div class="col"><p class="note"><b class="orange">хуже нормы два показателя:</b> найм на одного ушедшего (0,56) и текучесть в otp tech (~20%). первое — осознанное решение руководства, второе — нет: это единственный показатель удержания, по которому мы хуже рынка.</p>
+      <p class="tiny" style="margin-top:18px">нормы — обобщённые диапазоны по it/tech, а не данные конкретного исследования. для точных цифр по россии и кипру нужен свежий отчёт (radford / mercer / linkedin).</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    space307 · people analytics · 9m'2026 (jan–sep) · источники: 2026 full analytics (dismissals, new hire, total, hc) + выгрузка сотрудников 05.10.2026 + отчёты q2 / q3'2026 · zerox = walbi
+  </div>
+</footer>
+
+<script>
+const green='#2B8042',orange='#FF5A2A',purple='#6B54A1',mut='#929292';
+const fmt=v=>String(v).replace('.',',');
+
+// HC TREND
+const hc=[["q2'25",495],["q3'25",498],["q4'25",502],["q1'26",498],["q2'26",489],["q3'26",458]];
+const hcBase=420, hcTop=510;
+document.getElementById('hcTrend').innerHTML=hc.map(([m,v],i)=>{
+  const h=(v-hcBase)/(hcTop-hcBase)*190; const last=i===hc.length-1;
+  return `<div class="month"><div class="mcols"><div class="mcol" style="width:48px"><div style="font-size:11px;color:${last?orange:mut};text-align:center;margin-bottom:6px">${v}</div><div style="height:${h}px;background:${last?orange:(i>=3?'#5a5a5a':'#2f2f2f')}"></div></div></div><div class="mcap">${m}</div></div>`;
+}).join('');
+
+// FLOW
+const flow=[['янв',8,11],['фев',4,7],['мар',15,12],['апр',8,3],['май',7,16],['июн',4,8],['июл',5,5],['авг',1,13],['сен',2,21]];
+const fm=21;
+document.getElementById('flow').innerHTML=flow.map(([m,h,f])=>`<div class="month"><div class="mcols">
+  <div class="mcol" style="width:18px"><div style="font-size:10px;color:${green};text-align:center;margin-bottom:6px">${h}</div><div style="height:${h/fm*170}px;background:${green}"></div></div>
+  <div class="mcol" style="width:18px"><div style="font-size:10px;color:${orange};text-align:center;margin-bottom:6px">${f}</div><div style="height:${f/fm*170}px;background:${orange}"></div></div>
+</div><div class="mcap">${m}</div></div>`).join('');
+
+// PRODUCTS [name, jan, q1, q2, q3, hires, terms]
+const prod=[['OTP Tech',121,125,125,120,15,18],['OTP Marketing',117,114,118,109,17,23],['Corp',85,85,81,72,2,15],['KNX',32,34,35,35,2,2],['Doto',38,37,38,30,6,14],['OTP Product',29,27,25,25,3,5],['Walbi',30,31,20,20,1,13],['OTP Others',13,18,15,15,1,1],['OTP Risks',16,14,14,14,0,3],['OTP Analytics',12,12,11,10,0,1],['PetPro',0,0,5,6,5,0],['Gate',1,1,2,2,2,1]];
+document.getElementById('prodTable').innerHTML=prod.map(([n,j,a,b,c,h,t])=>{
+  const d=c-j; const cls=d>0?'delta-up':(d<0?'delta-down':'mut');
+  const s=d>0?`+${d}`:(d<0?`${d}`:'0');
+  const p=j?(d>0?'+':'')+fmt((d/j*100).toFixed(1))+'%':'new';
+  return `<tr><td>${n.toLowerCase()}</td><td class="num mut">${j}</td><td class="num">${a}</td><td class="num">${b}</td><td class="num">${c}</td><td class="num ${cls}">${s}</td><td class="num ${cls}">${d===0?'—':p}</td><td class="num">${h}</td><td class="num">${t}</td></tr>`;
+}).join('')+`<tr><td class="mut">итого</td><td class="num mut">494</td><td class="num mut">498</td><td class="num mut">489</td><td class="num mut">458</td><td class="num delta-down">−36</td><td class="num delta-down">−7,3%</td><td class="num mut">54</td><td class="num mut">96</td></tr>`;
+const fmax=23;
+document.getElementById('prodVis').innerHTML=prod.map(([n,j,a,b,c,h,t])=>`<div class="pcard" style="grid-template-columns:150px 1fr 1fr;gap:20px;padding:10px 0">
+  <div class="pname" style="font-size:13px">${n.toLowerCase()}</div>
+  <div style="display:flex;justify-content:flex-end;align-items:center;gap:8px"><span class="tiny">${h}</span><div style="height:12px;width:${h/fmax*100}%;background:${green}"></div></div>
+  <div style="display:flex;align-items:center;gap:8px"><div style="height:12px;width:${t/fmax*100}%;background:${orange}"></div><span class="tiny">${t}</span></div>
+</div>`).join('');
+
+// AGE TABLE
+const ages=[['21–25',20,20,23,18],['26–30',122,118,109,92],['31–35',192,193,189,175],['36–40',106,110,111,116],['41–45',26,27,28,28],['46+',28,30,29,29]];
+document.getElementById('ageTable').innerHTML=ages.map(([l,a,b,c,d])=>{const x=d-a;const cls=x>0?'delta-up':(x<0?'delta-down':'mut');
+  return `<tr><td>${l}</td><td class="num">${a}</td><td class="num">${b}</td><td class="num">${c}</td><td class="num">${d}</td><td class="num ${cls}">${x>0?'+'+x:x}</td></tr>`}).join('');
+
+// TYPE BARS per quarter
+const types=[['q1',11,19],['q2',7,20],['q3',5,34]];
+document.getElementById('typeBars').innerHTML=types.map(([q,v,i])=>`<div style="display:grid;grid-template-columns:40px 1fr;gap:14px;align-items:center;padding:6px 0">
+  <div class="tiny">${q}</div>
+  <div style="display:flex;height:26px;width:${(v+i)/39*100}%">
+    <div style="flex:${v};background:${orange};font-size:11px;color:#000;display:flex;align-items:center;padding-left:8px">${v}</div>
+    <div style="flex:${i};background:#5a5a5a;font-size:11px;color:#fff;display:flex;align-items:center;padding-left:8px">${i}</div>
+  </div></div>`).join('');
+
+// REASONS q2+q3
+const reasons=[['сокращение',41],['результаты работы',9],['выгорание',4],['нет роста',3],['финансовые условия',3],['коммуникация',2],['другое',2],['административные',1],['декрет',1]];
+document.getElementById('reasonBars').innerHTML=reasons.map(([l,v])=>{
+  const c=['выгорание','нет роста','финансовые условия'].includes(l)?orange:'#3a3a3a';
+  return `<div class="bar"><div class="lab">${l}</div><div class="track"><div class="fill" style="width:${v/41*100}%;background:${c}"></div></div><div class="val">${v}</div></div>`;
+}).join('');
+
+// LEAVER TENURE
+const lt=[['<1 г',23],['1–3 г',28],['3–6 г',24],['6+ г',15]];
+document.getElementById('leaverTen').innerHTML=lt.map(([l,v],i)=>`<div class="bar small"><div class="lab">${l}</div><div class="track"><div class="fill" style="width:${v/28*100}%;background:${i<=1?orange:'#3a3a3a'}"></div></div><div class="val">${v}</div></div>`).join('');
+
+// BENCH
+const bench=[
+  ['общая текучесть','9 мес, пересчёт на год',26.3,'26%',18,22,0,40,'выше · из-за сокращений',orange],
+  ['текучесть без сокращений','q2–q3, пересчёт на год',10.4,'10%',13,15,0,40,'ниже нормы · хорошо',green],
+  ['текучесть · otp tech','9 мес, сокращений не было',19.5,'20%',13,15,0,40,'выше нормы',orange],
+  ['нежелательные уходы','ушли сами, хотели удержать',4.6,'5%',5,8,0,20,'уровень лучших',green],
+  ['средний стаж','лет',4.5,'4,5 г',2,3,0,7,'выше нормы',green],
+  ['доля женщин','на 30.09',45,'45%',30,40,0,60,'сбалансированнее рынка',green],
+  ['доля новичков','стаж меньше года, на 30.09',13.1,'13%',15,20,0,40,'ниже · найм остановлен',mut],
+  ['наймов на одного ушедшего','за 9 месяцев',0.56,'0,56',0.95,1.05,0,1.5,'компания сокращается',orange]
+];
+document.getElementById('benchRows').innerHTML=bench.map(([mt,sub,val,vl,lo,hi,smin,smax,vd,vc])=>{
+  const pos=v=>((v-smin)/(smax-smin))*100;
+  return `<div class="brow"><div class="bmetric">${mt}<div class="sub">${sub}</div></div><div class="bval">${vl}</div>
+    <div class="bscale"><div class="axis"></div><div class="norm" style="left:${pos(lo)}%;width:${pos(hi)-pos(lo)}%"></div>
+    <div class="normlab" style="left:${pos(lo)}%">${fmt(lo)}–${fmt(hi)}</div><div class="mark" style="left:${pos(val)}%;background:${vc}"></div>
+    <div class="marklab" style="left:${pos(val)}%;color:${vc}">${vl}</div></div><div class="bverdict" style="color:${vc}">${vd}</div></div>`;
+}).join('');
+</script>
+</body>
+</html>

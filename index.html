@@ -354,6 +354,24 @@ textarea::placeholder,input::placeholder{color:var(--muted);opacity:.75}
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
+<!-- Firebase SDK (compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script>
+/* === Firebase config ===
+   Вставь сюда конфиг веб-приложения из консоли Firebase
+   (Project settings → Your apps → SDK setup and configuration → Config). */
+window.FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCZvgjur-rBE1GhBq4VHUkIl_C3yvOqoGo",
+  authDomain: "holdi-board.firebaseapp.com",
+  projectId: "holdi-board",
+  storageBucket: "holdi-board.firebasestorage.app",
+  messagingSenderId: "858571496582",
+  appId: "1:858571496582:web:a0eb6606ce7080d9938507"
+};
+</script>
+
 <script>
 (function(){
 'use strict';
@@ -633,7 +651,7 @@ function submit(){
     .then(function(){ submitting = false; paintFormStatus(); });
 }
 function applyAccess(){
-  if (!db || !uid) notice('Сейчас ответы сохраняются только в этом браузере. Чтобы отправить их в общие итоги, открой страницу под своим аккаунтом Claude.');
+  if (!db || !uid) notice('Подключаемся к базе… Если сообщение не исчезает — ответы пока сохраняются только в этом браузере. Проверь интернет и обнови страницу.');
   else if (readOnly) notice('У тебя доступ только на просмотр. Попроси организатора дать право вносить данные, после этого анкету можно будет отправить. Черновик пока хранится в этом браузере.');
   else notice('');
   paintFormStatus();
@@ -880,20 +898,27 @@ function boot(){
   go(start, false);
   renderAll(); applyAccess();
 
-  var c = window.claude;
-  if (!c || typeof c.use !== 'function') return;
-  Promise.all([c.use('db'), c.use('user')]).then(function(r){
-    db = r[0]; user = r[1];
-    var who = user ? Promise.all([user.me(), user.can('data.write')]) : Promise.resolve([null, null]);
-    return who;
-  }).then(function(r){
-    me = r[0]; canWrite = r[1];
-    uid = me && me.id;
-    if (canWrite === false) readOnly = true;
-    if (me && me.name) $('f_label').placeholder = me.name;
-    if (me && me.canEdit && db) $('metaEditBtn').hidden = false;
+  var cfg = window.FIREBASE_CONFIG;
+  if (!cfg || !cfg.apiKey || typeof firebase === 'undefined'){
+    draftChecked = true; firstSnap = true; applyAccess(); hydrate(); return;
+  }
+  try {
+    if (!firebase.apps || !firebase.apps.length) firebase.initializeApp(cfg);
+    db = firebase.firestore();
+  } catch(e){
+    db = null; draftChecked = true; firstSnap = true; applyAccess(); hydrate(); return;
+  }
+  var started = false;
+  firebase.auth().signInAnonymously().catch(function(){
+    toast('Не удалось подключиться к базе. Проверь интернет и попробуй обновить страницу.');
+  });
+  firebase.auth().onAuthStateChanged(function(u){
+    if (!u || started) return;
+    started = true;
+    uid = u.uid;
+    canWrite = true; readOnly = false;
+    if (db) $('metaEditBtn').hidden = false;
     applyAccess();
-    if (!db){ draftChecked = true; firstSnap = true; return; }
     db.collection('responses').onSnapshot(function(snap){
       var next = {};
       snap.docs.forEach(function(d){ var x = d.data(); if (x && x.answers) next[d.id] = x; });
@@ -901,13 +926,11 @@ function boot(){
       hydrate(); renderAll();
     }, function(){ firstSnap = true; hydrate(); });
     db.doc('meta/session').onSnapshot(function(s){ meta = (s.exists && s.data()) || {}; paintMeta(); }, function(){});
-    if (uid){
-      db.doc('data/users/'+uid+'/draft').get()
-        .then(function(s){ if (s.exists) dbDraft = s.data(); })
-        .catch(function(){})
-        .then(function(){ draftChecked = true; hydrate(); });
-    } else { draftChecked = true; hydrate(); }
-  }).catch(function(){ applyAccess(); });
+    db.doc('data/users/'+uid+'/draft').get()
+      .then(function(s){ if (s.exists) dbDraft = s.data(); })
+      .catch(function(){})
+      .then(function(){ draftChecked = true; hydrate(); });
+  });
 }
 boot();
 })();
